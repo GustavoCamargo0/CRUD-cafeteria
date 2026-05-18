@@ -199,3 +199,12 @@ input:focus {
 .modal button:last-of-type {
   background: #ccc;
 }
+
+.selectc {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: white;
+  font-size: 15px;
+  color: var(--text);
+}

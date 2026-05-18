@@ -9,7 +9,8 @@ function Pedidos() {
     const [pedidos, setPedidos] = useState([])
     const [produto, setProduto] = useState("")
     const [valor, setValor] = useState("")
-    const [clienteId, setClienteId] = useState("")
+    const [cliente_id, setCliente_id] = useState("")
+    const [filtroStatus, setFiltroStatus] = useState("todos")
     const location = useLocation()
 
     useEffect(() => {
@@ -27,6 +28,10 @@ function Pedidos() {
 
     async function cadastrarPedido() {
         try {
+            if (produto.trim() === '' || valor.trim() === '' || cliente_id.trim() === '') {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
             await api.post('/pedidos', {
                 produto,
                 valor,
@@ -35,7 +40,7 @@ function Pedidos() {
 
             setProduto("")
             setValor("")
-            setClienteId("")
+            setCliente_id("")
 
             loadPedidos()
 
@@ -44,37 +49,23 @@ function Pedidos() {
         }
     }
 
-    async function deleteCliente(id) {
+    async function atualizarStatus(id, status) {
         try {
-            await api.delete(`/clientes/${id}`)
-            loadPedido()
+            const novoStatus = status === 'entregue' ? 'pendente' : 'entregue';
+            await api.put(`/pedidos/${id}`, { status: novoStatus });
+            loadPedidos();
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
     }
 
-    async function editCliente() {
+    async function deletePedido(id) {
         try {
-            await api.put(`/clientes/${idEdit}`, {
-                nome: editNome,
-                email: editEmail
-            })
-            loadClientes()
-            setEditEmail('')
-            setEditNome('')
-            setEdit(false)
-
+            await api.delete(`/pedidos/${id}`);
+            loadPedidos();
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-    }
-
-    function openEdit(cliente) {
-
-        setIdEdit(cliente.id)
-        setEditNome(cliente.nome)
-        setEditEmail(cliente.email)
-        setEdit(true)
     }
 
     return (
@@ -99,23 +90,42 @@ function Pedidos() {
                 onChange={(e) => setValor(e.target.value)}
                 className='inputc'
             />
+            <input
+                type="text"
+                placeholder="Cliente ID"
+                value={cliente_id}
+                onChange={(e) => setCliente_id(e.target.value)}
+                className='inputc'
+            />
 
             <button onClick={cadastrarPedido} className='buttonc'>
                 Cadastrar Pedido
             </button>
 
-            {pedidos.map(pedido => (
+            <select className='selectc'
+                value={filtroStatus}
+                onChange={(e) => setFiltroStatus(e.target.value)}
+            >
+                <option value="todos">Todos</option>
+                <option value="entregue">Entregues</option>
+                <option value="pendente">Pendentes</option>
+            </select>
+
+            {pedidos.filter(pedido => filtroStatus === "todos" || pedido.status === filtroStatus).map(pedido => (
                 <div key={pedido.id} className='boxc'>
-                    <p>{pedido.produto} </p>
-                    <p>{pedido.valor}</p>
-                    <button onClick={() => openEdit(cliente)} className='buttonc'>
-                        Editar
+                    <p><strong>Produto:</strong> {pedido.produto} </p>
+                    <p><strong>Valor:</strong> R$ {pedido.valor}</p>
+                    <p><strong>Cliente ID:</strong> {pedido.cliente_id}</p>
+                    <p><strong>Status:</strong> <span style={{ color: pedido.status === 'entregue' ? 'green' : 'red' }}>{pedido.status}</span></p>
+                    <button onClick={() => atualizarStatus(pedido.id, pedido.status)} className='buttonc'>
+                        {pedido.status === 'entregue' ? 'Marcar como Pendente' : 'Marcar como Entregue'}
                     </button>
-                    <button onClick={() => deleteCliente(cliente.id)} className='buttonc'>
+                    <button onClick={() => deletePedido(pedido.id)} className='buttonc'>
                         Deletar
                     </button>
                 </div>
             ))}
+         
 
         </>
 

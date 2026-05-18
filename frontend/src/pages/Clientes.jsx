@@ -30,9 +30,16 @@ function Clientes() {
 
     async function cadastrarCliente() {
         try {
+            if (nome.trim() === '' || email.trim() === '') {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+
             await api.post('/clientes', {
                 nome,
                 email
+
+
             })
 
             setNome("")
@@ -56,6 +63,11 @@ function Clientes() {
 
     async function editCliente() {
         try {
+
+            if (editNome.trim() === '' || editEmail.trim() === '') {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
             await api.put(`/clientes/${idEdit}`, {
                 nome: editNome,
                 email: editEmail
@@ -107,6 +119,7 @@ function Clientes() {
 
             {clientes.map(cliente => (
                 <div key={cliente.id} className='boxc'>
+                    <p>ID: {cliente.id}</p>
                     <p>{cliente.nome} </p>
                     <p>{cliente.email}</p>
                     <button onClick={() => openEdit(cliente)} className='buttonc'>
