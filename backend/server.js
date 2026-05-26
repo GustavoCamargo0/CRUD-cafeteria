@@ -15,25 +15,24 @@ app.post('/clientes', async (req, res) => {
   const { nome, email } = req.body;
 
 
-  if (!nome || !email) {
+   if (!nome || !email) {
     return res.status(400).json({
       erro: 'Nome e email são obrigatórios'
     });
+  }
 
-    try {
-      const result = await pool.query(
-        'INSERT INTO clientes (nome, email) VALUES ($1, $2) RETURNING *',
-        [nome, email]
+  try {
+    const result = await pool.query(
+      'INSERT INTO clientes (nome, email) VALUES ($1, $2) RETURNING *',
+      [nome, email]
+    );
 
-      );
+    res.json(result.rows[0]);
 
-
-      res.json(result.rows[0]);
-    } catch (err) {
-      res.status(500).json({ erro: err.message });
-    }
-  }});
-
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
 app.get('/clientes', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM clientes');
